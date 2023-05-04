@@ -1,8 +1,6 @@
 'use strict';
 
-import * as util from 'util';
-
-export {loadJson} from './lib/utils.js';
+import {format} from './lib/utils.js';
 
 export class Locale {
     constructor(options) {
@@ -35,7 +33,7 @@ export class Locale {
         if (this.driver)
             text = await this.driver(this.language, text, domains);
 
-        return util.format(text, ...opt);
+        return format(text, ...opt);
     }
     
     async _(text, ...opt) {
@@ -43,7 +41,7 @@ export class Locale {
     }
 
     async _nd(domains, n, singular, plural, ...opt) {
-        return util.format((n == 1)? singular: plural, ...opt);
+        return format((n == 1)? singular: plural, ...opt);
     }
 
     async _n(n, singular, plural, ...opt) {
