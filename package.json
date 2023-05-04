@@ -4,7 +4,7 @@
   "main": "rf-locale.js",
   "type": "module",
   "bin": {
-    "gt": "./bin/gt.js"
+    "rf-locale": "./bin/rf-locale.js"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
@@ -13,5 +13,11 @@
   "keywords": [],
   "author": "Fabian Lucena",
   "license": "ISC",
-  "description": ""
+  "description": "",
+  "devDependencies": {
+    "glob": "^10.2.2",
+    "prompt": "^1.3.0"
+  },
+  "dependencies": {
+  }
 }
