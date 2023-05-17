@@ -18,6 +18,10 @@ export class Locale {
         return this;
     }
 
+    getPluralFromIndex(n) {
+        return (n < 2)? n: 2;
+    }
+
     _f(text, ...params) {
         if (params && params.length)
             return [text, ...params];
@@ -41,11 +45,28 @@ export class Locale {
     }
 
     async _nd(domains, n, singular, plural, ...opt) {
-        return format((n == 1)? singular: plural, ...opt);
+        let text;
+        if (this.driver) {
+            const texts = await this.driver(this.language, [null, singular, plural], domains);
+            text = texts[this.getPluralFromIndex(n)];
+        } else {
+            text = (n == 1)? singular: plural;
+        }
+
+        return format(text, ...opt);
     }
 
     async _n(n, singular, plural, ...opt) {
         return this._nd(null, n, singular, plural, ...opt);
+    }
+
+    async _a(texts) {
+        return Promise.all(texts.map(async v => {
+            if (typeof v === 'function')
+                v = await v();
+    
+            return v;
+        }));
     }
 
     async _or(...list) {
