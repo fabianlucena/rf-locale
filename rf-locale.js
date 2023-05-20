@@ -22,6 +22,13 @@ export class Locale {
         return (n < 2)? n: 2;
     }
 
+    async getTextRaw(texts, domain, language) {
+        if (!this.driver)
+            return;
+
+        return this.driver(this.language ?? language, texts, domain);
+    }
+
     _f(text, ...params) {
         if (params && params.length)
             return [text, ...params];
@@ -34,8 +41,7 @@ export class Locale {
     }
 
     async _d(domains, text, ...opt) {
-        if (this.driver)
-            text = await this.driver(this.language, text, domains);
+        text = (await this.getTextRaw(text, domains))[text] ?? text;
 
         return format(text, ...opt);
     }
@@ -46,12 +52,11 @@ export class Locale {
 
     async _nd(domains, n, singular, plural, ...opt) {
         let text;
-        if (this.driver) {
-            const texts = await this.driver(this.language, [null, singular, plural], domains);
+        const texts = (await this.getTextRaw([[null, singular, plural]], domains))[[null, singular, plural]];
+        if (texts)
             text = texts[this.getPluralFromIndex(n)];
-        } else {
+        else
             text = (n == 1)? singular: plural;
-        }
 
         return format(text, ...opt);
     }
