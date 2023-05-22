@@ -13,11 +13,18 @@ export class Locale {
     }
 
     clone(options) {
-        return new Locale({...this, ...options});
+        const loc = new Locale({...this, ...options});
+        if (!loc.language) {
+            const languageDataList = loc.getLanguageDataListFromAcceptLanguage();
+            if (languageDataList?.length)
+                loc.language = languageDataList[0].language;
+        }
+
+        return loc;
     }
 
     getLanguageDataListFromAcceptLanguage() {
-        const languageList = this.acceptLanguage.split(',')
+        return this.acceptLanguage?.split(',')
             .map(lang => {
                 const data = lang.split(';');
                 const newLang = {language: data[0]};
@@ -33,8 +40,6 @@ export class Locale {
                 return newLang;
             })
             .sort((a, b) => b.q - a.q);
-
-        return languageList;
     }
 
     async tryLoadLocale(language) {
@@ -95,7 +100,7 @@ export class Locale {
         if (!(texts instanceof Array))
             texts = [texts];
 
-        return this.driver(this.language ?? language, texts, domain);
+        return this.driver(language ?? this.language, texts, domain);
     }
 
     _f(text, ...params) {
