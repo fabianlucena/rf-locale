@@ -1,11 +1,15 @@
 'use strict';
 
-import {format} from './lib/utils.js';
+import { format, merge } from './lib/utils.js';
+import en from './locale/en.js';
 
 export class Locale {
-    locale = null;
+    static availableLanguages = {
+        en: en,
+    };
+
+    language = null;
     driver = null;
-    loadLocale = null;
 
     constructor(options) {
         for (const k in options)
@@ -13,18 +17,49 @@ export class Locale {
     }
 
     clone(options) {
-        const loc = new Locale({...this, ...options});
-        if (!loc.language) {
-            const languageDataList = loc.getLanguageDataListFromAcceptLanguage();
-            if (languageDataList?.length)
-                loc.language = languageDataList[0].language;
-        }
-
-        return loc;
+        return new Locale({...this, ...options});
     }
 
-    getLanguageDataListFromAcceptLanguage() {
-        return this.acceptLanguage?.split(',')
+    async init(options) {
+        for (const k in options)
+            this[k] = options[k];
+
+        if (!this.language)
+            this.language = 'en';
+
+        if (!this.initLocale(this.language))    
+            throw new Error(`No language specified.`);
+    }
+
+    loadLanguageFromAcceptLanguage(acceptLanguage) {
+        const languageDataList = this.getLanguageDataListFromAcceptLanguage(acceptLanguage);
+        if (languageDataList?.length) {
+            for (const languageData of languageDataList) {
+                if (Locale.availableLanguages[languageData.language]) {
+                    this.language = languageData.language;
+                    return;
+                }
+            }
+        }
+    }
+
+    initLocale(copyLanguage) {
+        if (!copyLanguage)
+            return false;
+
+        if (!Locale.availableLanguages[this.language])
+            throw new Error(`Language "${language}" is not available.`);
+
+        const copylocale = Locale.availableLanguages[copyLanguage];
+        this.initLocale(copylocale.copy);
+
+        merge(this, copylocale);
+
+        return true;
+    }
+
+    getLanguageDataListFromAcceptLanguage(acceptLanguage) {
+        return acceptLanguage?.split(',')
             .map(lang => {
                 const data = lang.split(';');
                 const newLang = {language: data[0]};
@@ -42,54 +77,7 @@ export class Locale {
             .sort((a, b) => b.q - a.q);
     }
 
-    async tryLoadLocale(language) {
-        if (this.loadLocale) {
-            const locale = await this.loadLocale(language);
-            if (locale) {
-                this.locale ??= {};
-                for (const k in locale)
-                    this.locale[k] = locale[k];
-
-                return this.locale;
-            }
-        }
-    }
-
-    async getLocale(category) {
-        if (this.locale) {
-            if (!category)
-                return this.locale;
-
-            return this.locale[category];
-        }
-
-        if (this.acceptLanguage) {
-            const languageDataList = this.getLanguageDataListFromAcceptLanguage();
-            for (const languageData of languageDataList) {
-                if (languageData.language && await this.tryLoadLocale(languageData.language))
-                    break;
-            }
-        }
-            
-        if (!this.locale) {
-            if (this.language && await this.tryLoadLocale(this.language))
-                loaded = true;
-
-            if (!this.locale)
-                await this.tryLoadLocale('en');
-        }
-
-        if (this.locale) {
-            if (!category)
-                return this.locale;
-
-            return this.locale[category];
-        }
-
-        console.error('No language definition');
-    }
-
-    getPluralFromIndex(n) {
+    plural(n) {
         return (n < 2)? n: 2;
     }
 
@@ -128,7 +116,7 @@ export class Locale {
         let text;
         const texts = (await this.getTextRaw([[null, singular, plural]], domains))[[null, singular, plural]];
         if (texts)
-            text = texts[this.getPluralFromIndex(n)];
+            text = texts[this.plural(n)];
         else
             text = (n == 1)? singular: plural;
 
@@ -267,11 +255,11 @@ export class Locale {
             result += format.substring(index, position);
             position++;
             switch (format[position]) {
-                case 'a': result += (await this.getLocale('time')).abday[time.getDay()]; break; // Abbreviated weekday name * Thu
-                case 'A': result += (await this.getLocale('time')).day[time.getDay()]; break; // Full weekday name *  Thursday
-                case 'b': result += (await this.getLocale('time')).abmon[time.getMonth()]; break; // Abbreviated month name * Aug
-                case 'B': result += (await this.getLocale('time')).mon[time.getMonth()]; break; // Full month name * August
-                case 'c': result += await this.strftime((await this.getLocale('time')).d_t_fmt, time); break; // Date and time representation * Thu Aug 23 14:55:02 2001
+                case 'a': result += this.time.abday[time.getDay()]; break; // Abbreviated weekday name * Thu
+                case 'A': result += this.time.day[time.getDay()]; break; // Full weekday name *  Thursday
+                case 'b': result += this.time.abmon[time.getMonth()]; break; // Abbreviated month name * Aug
+                case 'B': result += this.time.mon[time.getMonth()]; break; // Full month name * August
+                case 'c': result += await this.strftime(this.time.d_t_fmt, time); break; // Date and time representation * Thu Aug 23 14:55:02 2001
                 case 'C': result += Math.floor(time.getFullYear() / 100).substring(0, 2); break; // Year divided by 100 and truncated to integer (00-99) 20
                 case 'd': result += ('0' + (time.getDate() + 1)).slice(-2); break; // Day of the month, zero-padded (01-31) 23
                 case 'D': result += await this.strftime('%m/%d/%y', time); break; // Short MM/DD/YY date, equivalent to %m/%d/%y 08/23/01
@@ -279,15 +267,15 @@ export class Locale {
                 case 'F': result += await this.strftime('%Y-%m-%d', time); break; // Short YYYY-MM-DD date, equivalent to %Y-%m-%d 2001-08-23
                 case 'g': result += ('0' + this.iso8601WeekYear(time)).slice(-2); break; // Week-based year, last two digits (00-99) 01
                 case 'G': result += this.iso8601WeekYear(time); break; // Week-based year 2001
-                case 'h': result += (await this.getLocale('time')).abmon[time.getMonth()]; break; // Abbreviated month name * (same as %b) Aug
+                case 'h': result += this.time.abmon[time.getMonth()]; break; // Abbreviated month name * (same as %b) Aug
                 case 'H': result += ('0' + time.getHours()).slice(-2); break; // Hour in 24h format (00-23) 14
                 case 'I': result += ('0' + (time.getHours() % 12) || 12).slice(-2); break; // Hour in 12h format (01-12) 02
                 case 'j': result += ('00' + this.dayOfYear(time)).slice(-3); break; // Day of the year (001-366) 235
                 case 'm': result += ('0' + (time.getMonth() + 1)).slice(-2); break; // Month as a decimal number (01-12) 08
                 case 'M': result += ('0' + time.getMinutes()).slice(-2); break; // Minute (00-59) 55
                 case 'n': result += '\n'; break; // New-line character ('\n') 
-                case 'p': result += (time.getHours() < 12)? (await this.getLocale('time')).am_pm[0]: (await this.getLocale('time')).am_pm[1]; break; // AM or PM designation PM
-                case 'r': result += await this.strftime((await this.getLocale('time')).t_fmt_ampm, time); break; // 12-hour clock time * 02:55:02 pm
+                case 'p': result += (time.getHours() < 12)? this.time.am_pm[0]: this.time.am_pm[1]; break; // AM or PM designation PM
+                case 'r': result += await this.strftime(this.time.t_fmt_ampm, time); break; // 12-hour clock time * 02:55:02 pm
                 case 'R': result += await this.strftime('%H:%M', time); break; // 24-hour HH:MM time, equivalent to %H:%M 14:55
                 case 'S': result += ('0' + time.getSeconds()).slice(-2); break; // Second (00-61) 02
                 case 't': result += '\t'; break; // Horizontal-tab character ('\t') 
@@ -297,8 +285,8 @@ export class Locale {
                 case 'V': result += ('0' + this.iso8601WeekNumber(time)).slice(-2); break; // ISO 8601 week number (01-53) 34
                 case 'w': result += time.getDay(); break; // Weekday as a decimal number with Sunday as 0 (0-6) 4
                 case 'W': result += ('0' + this.weekOfMondays(time)).slice(-2); break; // Week number with the first Monday as the first day of week one (00-53) 34
-                case 'x': result += await this.strftime((await this.getLocale('time')).d_fmt, time); break; // Date representation * 08/23/01
-                case 'X': result += await this.strftime((await this.getLocale('time')).t_fmt, time); break; // Time representation * 14:55:02
+                case 'x': result += await this.strftime(this.time.d_fmt, time); break; // Date representation * 08/23/01
+                case 'X': result += await this.strftime(this.time.t_fmt, time); break; // Time representation * 14:55:02
                 case 'y': result += ('0' + (time.getFullYear() % 100)).slice(-2); ; break; // Year, last two digits (00-99) 01
                 case 'Y': result += ('0' + time.getFullYear()).slice(-2); break; // Year 2001
                 case 'z': result += this.iso8601Offset(time); break; // ISO 8601 offset from UTC in timezone (1 minute=1, 1 hour=100) If timezone cannot be determined, no characters +100
@@ -318,3 +306,4 @@ export class Locale {
 }
 
 export const loc = new Locale();
+await loc.init();
