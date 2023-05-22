@@ -306,4 +306,4 @@ export class Locale {
 }
 
 export const loc = new Locale();
-await loc.init();
+loc.init();
