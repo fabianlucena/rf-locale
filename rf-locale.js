@@ -32,7 +32,7 @@ export class Locale {
 
                 return newLang;
             })
-            .sort((a, b) => a.q > b.q);
+            .sort((a, b) => b.q - a.q);
 
         return languageList;
     }
@@ -44,6 +44,8 @@ export class Locale {
                 this.locale ??= {};
                 for (const k in locale)
                     this.locale[k] = locale[k];
+
+                return this.locale;
             }
         }
     }
@@ -56,22 +58,19 @@ export class Locale {
             return this.locale[category];
         }
 
-        let loaded = false;
         if (this.acceptLanguage) {
             const languageDataList = this.getLanguageDataListFromAcceptLanguage();
             for (const languageData of languageDataList) {
-                if (languageData.language && await this.tryLoadLocale(languageData.language)) {
-                    loaded = true;
+                if (languageData.language && await this.tryLoadLocale(languageData.language))
                     break;
-                }
             }
         }
             
-        if (!loaded && !this.locale) {
+        if (!this.locale) {
             if (this.language && await this.tryLoadLocale(this.language))
                 loaded = true;
 
-            if (!loaded && !this.locale)
+            if (!this.locale)
                 await this.tryLoadLocale('en');
         }
 
@@ -277,8 +276,8 @@ export class Locale {
                 case 'G': result += this.iso8601WeekYear(time); break; // Week-based year 2001
                 case 'h': result += (await this.getLocale('time')).abmon[time.getMonth()]; break; // Abbreviated month name * (same as %b) Aug
                 case 'H': result += ('0' + time.getHours()).slice(-2); break; // Hour in 24h format (00-23) 14
-                case 'I': result += (time.getHours() % 12) || 12; break; // Hour in 12h format (01-12) 02
-                case 'j': result += this.dayOfYear(time); break; // Day of the year (001-366) 235
+                case 'I': result += ('0' + (time.getHours() % 12) || 12).slice(-2); break; // Hour in 12h format (01-12) 02
+                case 'j': result += ('00' + this.dayOfYear(time)).slice(-3); break; // Day of the year (001-366) 235
                 case 'm': result += ('0' + (time.getMonth() + 1)).slice(-2); break; // Month as a decimal number (01-12) 08
                 case 'M': result += ('0' + time.getMinutes()).slice(-2); break; // Minute (00-59) 55
                 case 'n': result += '\n'; break; // New-line character ('\n') 
@@ -290,9 +289,9 @@ export class Locale {
                 case 'T': result += await this.strftime('%H:%M:%S', time); break; // ISO 8601 time format (HH:MM:SS), equivalent to %H:%M:%S 14:55:02
                 case 'u': result += this.iso8601WeekDay(time); break; // ISO 8601 weekday as number with Monday as 1 (1-7) 4
                 case 'U': result += this.weekOfSundays(time); break; // Week number with the first Sunday as the first day of week one (00-53) 33
-                case 'V': result += this.iso8601WeekNumber(time); break; // ISO 8601 week number (01-53) 34
+                case 'V': result += ('0' + this.iso8601WeekNumber(time)).slice(-2); break; // ISO 8601 week number (01-53) 34
                 case 'w': result += time.getDay(); break; // Weekday as a decimal number with Sunday as 0 (0-6) 4
-                case 'W': result += this.weekOfMondays(time); break; // Week number with the first Monday as the first day of week one (00-53) 34
+                case 'W': result += ('0' + this.weekOfMondays(time)).slice(-2); break; // Week number with the first Monday as the first day of week one (00-53) 34
                 case 'x': result += await this.strftime((await this.getLocale('time')).d_fmt, time); break; // Date representation * 08/23/01
                 case 'X': result += await this.strftime((await this.getLocale('time')).t_fmt, time); break; // Time representation * 14:55:02
                 case 'y': result += ('0' + (time.getFullYear() % 100)).slice(-2); ; break; // Year, last two digits (00-99) 01
