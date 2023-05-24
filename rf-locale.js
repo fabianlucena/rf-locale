@@ -85,7 +85,7 @@ export class Locale {
         if (!this.driver)
             return;
 
-        if (!(texts instanceof Array))
+        if (!Array.isArray(texts))
             texts = [texts];
 
         return this.driver(language ?? this.language, texts, domain);
