@@ -83,7 +83,7 @@ export class Locale {
 
     async getTextRaw(texts, domain, language) {
         if (!this.driver)
-            return;
+            return texts;
 
         if (!Array.isArray(texts))
             texts = [texts];
@@ -113,10 +113,12 @@ export class Locale {
     }
 
     async _nd(domains, n, singular, plural, ...opt) {
+        const original = [null, singular, plural];
+        const translations = (await this.getTextRaw([original], domains))[original] ?? original;
+
         let text;
-        const texts = (await this.getTextRaw([[null, singular, plural]], domains))[[null, singular, plural]];
-        if (texts)
-            text = texts[this.plural(n)];
+        if (translations)
+            text = translations[this.plural(n)];
         else
             text = (n == 1)? singular: plural;
 
