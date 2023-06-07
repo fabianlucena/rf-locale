@@ -82,7 +82,7 @@ export class Locale {
     }
 
     async getTextRaw(texts, domain, language) {
-        if (!this.driver)
+        if (!this.driver|| texts === undefined || texts === null)
             return texts;
 
         if (!Array.isArray(texts))
@@ -103,12 +103,18 @@ export class Locale {
     }
 
     async _d(domains, text, ...opt) {
+        if (text === undefined || text === null)
+            return text;
+
         text = (await this.getTextRaw(text, domains))[text] ?? text;
 
         return format(text, ...opt);
     }
     
     async _(text, ...opt) {
+        if (text === undefined || text === null)
+            return text;
+
         return this._d(null, text, ...opt);
     }
 
