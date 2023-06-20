@@ -81,14 +81,34 @@ export class Locale {
         return (n < 2)? n: 2;
     }
 
-    async getTextRaw(texts, domain, language) {
+    async getTextRaw(texts, options) {
         if (!this.driver|| texts === undefined || texts === null)
             return texts;
 
         if (!Array.isArray(texts))
             texts = [texts];
 
-        return this.driver(language ?? this.language, texts, domain);
+        return this.driver(options?.language ?? this.language, texts, options);
+    }
+
+    async _dc(domain, context, text, ...opt) {
+        if (text === undefined || text === null)
+            return text;
+
+        text = (await this.getTextRaw(text, {domain, context}))[text] ?? text;
+
+        return format(text, ...opt);
+    }
+
+    _dcf(domain, context, text, ...params) {
+        if (params && params.length)
+            return [text, ...params];
+
+        return text;
+    }
+    
+    async _(text, ...opt) {
+        return this._dc(null, null, text, ...opt);
     }
 
     _f(text, ...params) {
@@ -98,41 +118,101 @@ export class Locale {
         return text;
     }
     
-    _nf(n, singular, plural, ...opt) {
-        return [singular, plural, ...opt];
+    async _d(domain, text, ...opt) {
+        return this._dc(domain, null, text, ...opt);
     }
 
-    async _d(domains, text, ...opt) {
-        if (text === undefined || text === null)
-            return text;
+    _df(domain, text, ...params) {
+        if (params && params.length)
+            return [text, ...params];
 
-        text = (await this.getTextRaw(text, domains))[text] ?? text;
-
-        return format(text, ...opt);
-    }
-    
-    async _(text, ...opt) {
-        if (text === undefined || text === null)
-            return text;
-
-        return this._d(null, text, ...opt);
+        return text;
     }
 
-    async _nd(domains, n, singular, plural, ...opt) {
-        const original = [null, singular, plural];
-        const translations = (await this.getTextRaw([original], domains))[original] ?? original;
+    async _c(context, text, ...opt) {
+        return this._dc(null, context, text, ...opt);
+    }
+
+    _cf(context, text, ...params) {
+        if (params && params.length)
+            return [text, ...params];
+
+        return text;
+    }
+
+    async _nndc(domain, context, n, none, singular, plural, ...opt) {
+        const original = [none, singular, plural];
+        const translations = (await this.getTextRaw([original], {domain, context}))[original] ?? original;
 
         let text;
         if (translations)
             text = translations[this.plural(n)];
+        else if (!n && none)
+            text = none;
         else
             text = (n == 1)? singular: plural;
 
         return format(text, ...opt);
     }
+    
+    _nndcf(domain, context, n, none, singular, plural, ...opt) {
+        return [none, singular, plural, ...opt];
+    }
+
+    async _nn(n, none, singular, plural, ...opt) {
+        return this._nndc(null, null, n, none, singular, plural, ...opt);
+    }
+    
+    _nnf(n, none, singular, plural, ...opt) {
+        return [none, singular, plural, ...opt];
+    }
+
+    async _nnd(domain, n, none, singular, plural, ...opt) {
+        return this._nndc(domain, null, n, none, singular, plural, ...opt);
+    }
+    
+    _nndf(domain, n, none, singular, plural, ...opt) {
+        return [none, singular, plural, ...opt];
+    }
+
+    async _nnc(context, n, none, singular, plural, ...opt) {
+        return this._nndc(null, context, n, none, singular, plural, ...opt);
+    }
+    
+    _nncf(context, n, none, singular, plural, ...opt) {
+        return [none, singular, plural, ...opt];
+    }
+
+    async _ndc(domain, context, n, singular, plural, ...opt) {
+        return this._nndc(domain, context, n, null, singular, plural, ...opt);
+    }
+    
+    _ndcf(domain, context, n, singular, plural, ...opt) {
+        return [singular, plural, ...opt];
+    }
 
     async _n(n, singular, plural, ...opt) {
-        return this._nd(null, n, singular, plural, ...opt);
+        return this._nndc(null, null, n, null, singular, plural, ...opt);
+    }
+    
+    _nf(n, singular, plural, ...opt) {
+        return [singular, plural, ...opt];
+    }
+
+    async _nd(domain, n, singular, plural, ...opt) {
+        return this._nndc(domain, null, n, null, singular, plural, ...opt);
+    }
+    
+    _ndf(domain, n, singular, plural, ...opt) {
+        return [singular, plural, ...opt];
+    }
+
+    async _nc(context, n, singular, plural, ...opt) {
+        return this._nndc(null, context, n, null, singular, plural, ...opt);
+    }
+    
+    _ncf(context, n, singular, plural, ...opt) {
+        return [singular, plural, ...opt];
     }
 
     async _a(texts) {
