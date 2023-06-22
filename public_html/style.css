@@ -1,0 +1,72 @@
+html {
+    width: 100%;
+    height: 100%;
+}
+
+body {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+#translations {
+    flex: auto;
+    overflow: auto;
+}
+
+table {
+    border-collapse: collapse;
+    width: 100%;
+}
+
+tr.editing {
+    background-color: lightblue;
+}
+
+tr.is-updated {
+    background-color: aquamarine;
+}
+
+td, th {
+    border: 1px solid black;
+}
+
+span.label {
+    border: 1px solid darkblue;
+    background-color: lightblue;
+    margin: .2em;
+    display: inline-block;
+    padding: .05em .3em;
+    border-radius: 0.3em;
+    font-family: courier;
+    font-weight: bold;
+    font-size: 80%;
+}
+
+span.is-json {
+    border-color: gray;
+    background-color: lightgrey;
+}
+
+span.is-draft {
+    border-color: brown;
+    background-color: lightyellow;
+}
+
+span.is-updated {
+    border-color: darkgreen;
+    background-color: lightgreen;
+}
+
+#ref,
+#source,
+#translation {
+    border: 1px solid darkslategrey;
+    width:100%;
+}
+
+#buttons {
+    margin: 1em;
+}

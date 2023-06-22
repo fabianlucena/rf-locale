@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<head>
+    <title>Translations</title>
+    <link rel="stylesheet" type="text/css" href="/style.css">
+    <script type="text/javascript" src="/script.js" ></script>
+</head>
+<body>
+    <div id="header">
+        <h1>Translations editor</h1>
+    </div>
+    <div id="translations">
+        <table>
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Source</th>
+                    <th>Context</th>
+                    <th>Translation</th>
+                </tr>
+            </thead>
+            <tbody id="translationSection">
+            </tbody>
+        </table>
+    </div>
+    <div id="editor">
+        <textarea id="ref" rows="2" disabled="disabled" placeholder="Here you will see where the source was taken."></textarea>
+        <textarea id="source" rows="5" disabled="disabled" placeholder="Here you will see the source text to translate." ></textarea>
+        <textarea id="translation" rows="5" placeholder="Write the translation here." onkeypress="translationUpdated(event)"></textarea>
+        <div id="buttons">
+            <label >Is JSON? <input type="checkbox" id="isJson" disabled="disabled" /></label>
+            <label >Is draft? <input type="checkbox" id="isDraft" /></label>
+            <button onclick="updateTranslationAndNext()">OK & Next (Ctrl + Enter)</button>
+            <button onclick="removeDraftAndNext()">Remove Draft & Next (Shift + Space)</button>
+            <button onclick="updateTranslation()">OK</button>
+            <button onclick="cancelTranslation()">Cancel</button>
+            <button onclick="saveTranslations()">Save</button>
+            <button onclick="finish()">Finish</button>
+        </div>
+    </div>
+</body>
+</html>
