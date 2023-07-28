@@ -352,6 +352,7 @@ export class Locale {
                 case 'd': result += ('0' + (time.getDate() + 1)).slice(-2); break; // Day of the month, zero-padded (01-31) 23
                 case 'D': result += await this.strftime('%m/%d/%y', time); break; // Short MM/DD/YY date, equivalent to %m/%d/%y 08/23/01
                 case 'e': result += (' ' + time.getDate()).slice(-2); break; // Day of the month, space-padded ( 1-31) 23
+                case 'f': result += ('00' + time.getMilliseconds()).slice(-3); break; // Short YYYY-MM-DD date, equivalent to %Y-%m-%d 2001-08-23
                 case 'F': result += await this.strftime('%Y-%m-%d', time); break; // Short YYYY-MM-DD date, equivalent to %Y-%m-%d 2001-08-23
                 case 'g': result += ('0' + this.iso8601WeekYear(time)).slice(-2); break; // Week-based year, last two digits (00-99) 01
                 case 'G': result += this.iso8601WeekYear(time); break; // Week-based year 2001
