@@ -82,7 +82,7 @@ export class Locale {
     }
 
     async getTextRaw(texts, options) {
-        if (!this.driver|| texts === undefined || texts === null)
+        if (!this.driver || texts === undefined || texts === null)
             return texts;
 
         if (!Array.isArray(texts))
