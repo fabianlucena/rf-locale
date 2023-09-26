@@ -12,8 +12,7 @@ export class Locale {
     driver = null;
 
     constructor(options) {
-        for (const k in options)
-            this[k] = options[k];
+        this.init(options);
     }
 
     clone(options) {
@@ -21,14 +20,17 @@ export class Locale {
     }
 
     async init(options) {
-        for (const k in options)
+        for (const k in options) {
             this[k] = options[k];
+        }
 
-        if (!this.language)
+        if (!this.language) {
             this.language = 'en';
+        }
 
-        if (!this.initLocale(this.language))    
+        if (!this.initLocale(this.language)) {
             throw new Error(`No language specified.`);
+        }
     }
 
     loadLanguageFromAcceptLanguage(acceptLanguage) {
@@ -44,11 +46,13 @@ export class Locale {
     }
 
     initLocale(copyLanguage) {
-        if (!copyLanguage)
+        if (!copyLanguage) {
             return false;
+        }
 
-        if (!Locale.availableLanguages[this.language])
+        if (!Locale.availableLanguages[this.language]) {
             throw new Error(`Language "${language}" is not available.`);
+        }
 
         const copylocale = Locale.availableLanguages[copyLanguage];
         this.initLocale(copylocale.copy);
@@ -82,18 +86,21 @@ export class Locale {
     }
 
     async getTextRaw(texts, options) {
-        if (!this.driver || texts === undefined || texts === null)
+        if (!this.driver || texts === undefined || texts === null) {
             return texts;
+        }
 
-        if (!Array.isArray(texts))
+        if (!Array.isArray(texts)) {
             texts = [texts];
+        }
 
         return this.driver(options?.language ?? this.language, texts, options);
     }
 
     async _dc(domain, context, text, ...opt) {
-        if (text === undefined || text === null)
+        if (text === undefined || text === null) {
             return text;
+        }
 
         text = (await this.getTextRaw(text, {domain, context}))[text] ?? text;
 
@@ -101,8 +108,9 @@ export class Locale {
     }
 
     _dcf(domain, context, text, ...params) {
-        if (params && params.length)
+        if (params && params.length) {
             return [text, ...params];
+        }
 
         return text;
     }
@@ -112,8 +120,9 @@ export class Locale {
     }
 
     _f(text, ...params) {
-        if (params && params.length)
+        if (params && params.length) {
             return [text, ...params];
+        }
 
         return text;
     }
@@ -123,8 +132,9 @@ export class Locale {
     }
 
     _df(domain, text, ...params) {
-        if (params && params.length)
+        if (params && params.length) {
             return [text, ...params];
+        }
 
         return text;
     }
@@ -134,8 +144,9 @@ export class Locale {
     }
 
     _cf(context, text, ...params) {
-        if (params && params.length)
+        if (params && params.length) {
             return [text, ...params];
+        }
 
         return text;
     }
@@ -145,12 +156,13 @@ export class Locale {
         const translations = (await this.getTextRaw([original], {domain, context}))[original] ?? original;
 
         let text;
-        if (translations)
+        if (translations) {
             text = translations[this.plural(n)];
-        else if (!n && none)
+        } else if (!n && none) {
             text = none;
-        else
+        } else {
             text = (n == 1)? singular: plural;
+        }
 
         return format(text, ...opt);
     }
@@ -217,23 +229,26 @@ export class Locale {
 
     async _a(texts) {
         return Promise.all(texts.map(async v => {
-            if (typeof v === 'function')
+            if (typeof v === 'function') {
                 v = await v();
+            }
     
             return v;
         }));
     }
 
     async _or(...list) {
-        if (list.length < 2)
+        if (list.length < 2) {
             return list[0];
+        }
         
         return list.slice(0, -1).join(', ') + ', or ' + list[list.length - 1];
     }
 
     async _and(...list) {
-        if (list.length < 2)
+        if (list.length < 2) {
             return list[0];
+        }
         
         return list.slice(0, -1).join(', ') + ', and ' + list[list.length - 1];
     }
@@ -269,8 +284,9 @@ export class Locale {
     }
 
     isLeapYear(year) {
-        if (!(year % 400))
+        if (!(year % 400)) {
             return false;
+        }
 
         return !(year % 100);
     }
@@ -280,42 +296,50 @@ export class Locale {
         const firstDay = firstDate.getDay();
         const isLeapYear = this.isLeapYear(year);
         if (!isLeapYear) {
-            if (firstDay === 4 /* thursday */)
+            if (firstDay === 4 /* thursday */) {
                 return 53;
+            }
         } else if (isLeapYear) {
-            if (firstDay === 3 /* wednesday */)
+            if (firstDay === 3 /* wednesday */) {
                 return 53;
+            }
         }
 
         const lastDate = new Date(year, 11, 31);
         const lastDay = lastDate.getDay();
         if (!isLeapYear) {
-            if (lastDay.getDay() === 4 /* thursday */)
+            if (lastDay.getDay() === 4 /* thursday */) {
                 return 53;
+            }
         } else if (isLeapYear) {
-            if (lastDay.getDay() === 5 /* friday */)
+            if (lastDay.getDay() === 5 /* friday */) {
                 return 53;
+            }
         }
     }
 
     iso8601WeekNumber(time) {
         const woy = (10 + this.dayOfYear(time) - iso8601WeekDay(time)) / 7;
-        if (woy < 1)
+        if (woy < 1) {
             return this.iso8601YearWeeks(time.getFullYear() - 1);
+        }
         
-        if (woy > this.iso8601YearWeeks(time.getFullYear()))
+        if (woy > this.iso8601YearWeeks(time.getFullYear())) {
             return 1;
+        }
 
         return woy;
     }
 
     iso8601WeekYear(time) {
         const woy = (10 + this.dayOfYear(time) - iso8601WeekDay(time)) / 7;
-        if (woy < 1)
+        if (woy < 1) {
             return time.getFullYear() - 1;
+        }
         
-        if (woy > this.iso8601YearWeeks(time.getFullYear()))
+        if (woy > this.iso8601YearWeeks(time.getFullYear())) {
             return time.getFullYear() + 1;;
+        }
 
         return time.getFullYear();
     }
