@@ -105,18 +105,21 @@ function editRow(index) {
 }
 
 function translationUpdated(evt) {
-    if (evt.code === 'Enter' && evt.ctrlKey)
+    if (evt.code === 'Enter' && evt.ctrlKey) {
         return updateTranslationAndNext();
+    }
 
-    if (evt.code === 'Space' && evt.shiftKey)
+    if (evt.code === 'Space' && evt.shiftKey) {
         return removeDraftAndNext();
+    }
 
     document.getElementById('isDraft').checked = false;
 }
 
 function cancelTranslation() {
-    if (editingTranslation)
+    if (editingTranslation) {
         editingTranslation.row.classList.remove('editing');
+    }
 
     editingTranslation = null;
     document.getElementById('isJson').checked = false;
@@ -127,8 +130,9 @@ function cancelTranslation() {
 }
 
 function updateTranslation() {
-    if (!editingTranslation)
+    if (!editingTranslation) {
         return;
+    }
 
     let isUpdated = false;
     const isDraft = document.getElementById('isDraft').checked;
@@ -170,10 +174,11 @@ function updateTranslationAndNext() {
     const index = editingTranslation.index;
     updateTranslation();
 
-    if (editingTranslation.index != index)
+    if (editingTranslation.index != index) {
         editRow(index);
-    else
+    } else {
         editRow(index + 1);
+    }
 }
 
 function removeDraftAndNext() {
@@ -184,8 +189,9 @@ function removeDraftAndNext() {
 async function saveTranslations() {
     const data = [];
     for (const translation of translations) {
-        if (!translation.isUpdated)
+        if (!translation.isUpdated) {
             continue;
+        }
 
         data.push({
             source: translation.source,
