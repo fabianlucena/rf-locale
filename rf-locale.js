@@ -1,5 +1,3 @@
-'use strict';
-
 import {format, merge} from './lib/utils.js';
 import en from './locale/en.js';
 
@@ -28,7 +26,7 @@ export class Locale {
             this.language = 'en';
         }
 
-        if (!this.initLocale(this.language)) {
+        if (!await this.initLocale(this.language)) {
             throw new Error(`No language specified.`);
         }
     }
@@ -45,19 +43,27 @@ export class Locale {
         }
     }
 
-    initLocale(copyLanguage) {
+    async initLocale(copyLanguage) {
         if (!copyLanguage) {
             return false;
         }
 
-        if (!Locale.availableLanguages[this.language]) {
-            throw new Error(`Language "${language}" is not available.`);
+        let copyLocale;
+        if (this.getLanguageDefinition) {
+            copyLocale = await this.getLanguageDefinition(copyLanguage);
         }
 
-        const copylocale = Locale.availableLanguages[copyLanguage];
-        this.initLocale(copylocale.copy);
+        if (!copyLocale) {
+            if (!Locale.availableLanguages[this.language]) {
+                throw new Error(`Language "${language}" is not available.`);
+            }
 
-        merge(this, copylocale);
+            copyLocale = Locale.availableLanguages[copyLanguage];
+        }
+
+        await this.initLocale(copyLocale.copy);
+
+        merge(this, copyLocale);
 
         return true;
     }
