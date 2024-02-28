@@ -426,3 +426,5 @@ export class Locale {
 
 export const loc = new Locale();
 loc.init();
+
+export const defaultLoc = loc;
