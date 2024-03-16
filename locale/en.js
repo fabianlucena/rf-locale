@@ -5,9 +5,22 @@ export default {
     },
 
     numeric: {
-        decimal_point:    '.',
-        thousands_sep:    ',',
-        grouping:         3,
+        decimal_point: '.',
+        thousands_sep: ',',
+        grouping:        3,
+    },
+
+    percent: {
+        symbol:        '%',
+        positive_sign: '',
+        negative_sign: '-',
+        frac_digits:     2,
+        p_cs_precedes:   0,
+        p_sep_by_space:  1,
+        n_cs_precedes:   0,
+        n_sep_by_space:  1,
+        p_sign_posn:     1,
+        n_sign_posn:     1,
     },
 
     time: {
@@ -88,7 +101,7 @@ export default {
         currency_symbol:      '$',
         mon_decimal_point:    ',',
         mon_thousands_sep:    '.',
-        mon_grouping:         [3, 3],
+        mon_grouping:         3,
         positive_sign:        '',
         negative_sign:        '-',
         int_frac_digits:      2,

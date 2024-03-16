@@ -422,6 +422,186 @@ export class Locale {
 
         return result;
     }
+
+    number_format(number, optionsOrDecimals, options) {
+        const defaultOptions = {
+            thousands_sep: ',',
+            decimal_point: '.',
+            ...this.numeric,
+        }
+
+        if (optionsOrDecimals === undefined) {
+            options = {...defaultOptions, ...options};
+        } else if (typeof optionsOrDecimals !== 'object') {
+            options = {...defaultOptions, ...options, frac_digits: optionsOrDecimals};
+        } else {
+            options = {...defaultOptions, ...options, ...optionsOrDecimals};
+        }
+
+        if (options.int) {
+            defaultOptions = {
+                symbol: defaultOptions.int_curr_symbol,
+                frac_digits: int_frac_digits,
+                p_cs_precedes: int_p_cs_precedes,
+                p_sep_by_space: int_p_sep_by_space,
+                n_cs_precedes: int_n_cs_precedes,
+                n_sep_by_space: int_n_sep_by_space,
+                p_sign_posn: int_p_sign_posn,
+                n_sign_posn: int_n_sign_posn,
+            }
+        }
+
+        if (!options.symbol) {
+            if (options.int) {
+                if (options.intSymbolName) {
+                    options.symbol = options[options.intSymbolName];
+                }
+
+                if (options.intDefaultSymbol) {
+                    options.symbol = options.intDefaultSymbol;
+                }
+            } else {
+                if (options.symbolName) {
+                    options.symbol = options[options.symbolName];
+                }
+
+                if (options.defaultSymbol) {
+                    options.symbol = options.defaultSymbol;
+                }
+            }
+        }
+
+        let formated;
+        if (options.frac_digits === undefined) {
+            formated = Math.abs(number).toString();
+        } else {
+            formated = Math.abs(number).toFixed(options.frac_digits);
+        }
+
+        const parts = formated.split('.');
+        if (options.grouping) {
+            let integer = parts[0];
+            let rgx = new RegExp(`(\\d+)(\\d{${options.grouping}})`);
+        
+            while (rgx.test(integer)) {
+                integer = integer.replace(rgx, '$1' + options.thousands_sep + '$2');
+            }
+            parts[0] = integer;
+        }
+
+        formated = parts.join(options.decimal_point);
+
+        let sign;
+        let sep;
+        let precedes;
+        let signPos;
+
+        if (number >= 0) {
+            sign = options.positive_sign;
+            sep = options.p_sep_by_space? ' ': '';
+            precedes = options.p_cs_precedes;
+            signPos = options.p_sign_posn;
+        } else {
+            sign = options.negative_sign;
+            sep = options.n_sep_by_space? ' ': '';
+            precedes = options.n_cs_precedes;
+            signPos = options.n_sign_posn;
+        }
+
+        if (precedes) {
+            number = options.symbol + sep + number;
+        } else {
+            number = number + sep + options.symbol;
+        }
+
+        switch (signPos) {
+            case 0:
+                if (precedes) {
+                    formated = options.symbol + sep + formated;
+                } else {
+                    formated = formated + sep + options.symbol;
+                }
+
+                formated = `(${formated})`
+            break;
+
+            case 1:
+                if (precedes) {
+                    formated = options.symbol + sep + formated;
+                } else {
+                    formated = formated + sep + options.symbol;
+                }
+
+                formated = sign + formated;
+            break;
+
+            case 2:
+                if (precedes) {
+                    formated = options.symbol + sep + formated;
+                } else {
+                    formated = formated + sep + options.symbol;
+                }
+
+                formated = formated + sign;
+            break;
+
+            case 3:
+                if (precedes) {
+                    formated = sign + options.symbol + sep + formated;
+                } else {
+                    formated = formated + sep + sign + options.symbol;
+                }
+            break;
+
+            case 4:
+                if (precedes) {
+                    formated = options.symbol + sign + sep + formated;
+                } else {
+                    formated = formated + sep + options.symbol + sign;
+                }
+            break;
+        }
+
+        return formated;
+    }
+
+    number(number, optionsOrDecimals) {
+        return this.number(number, optionsOrDecimals);
+    }
+
+    percent_format(number, optionsOrDecimals) {
+        const defaultOptions = {
+            defaultSymbol: '%',
+            symbolName: 'percent_symbol',
+            ...this.percent,
+        }
+
+        return this.number_format(number, optionsOrDecimals, defaultOptions);
+    }
+
+    percent(number, optionsOrDecimals) {
+        return this.percent_format(number, optionsOrDecimals);
+    }
+
+    monetary_format(number, optionsOrDecimals, int) {
+        const defaultOptions = {
+            defaultSymbol: '$',
+            intDefaultSymbol: '$',
+            symbolName: 'currency_symbol',
+            intSymbolName: 'int_curr_symbol',
+            ...this.monetary,
+            decimal_point: this.monetary.mon_decimal_point,
+            thousands_sep: this.monetary.mon_thousands_sep,
+            mon_grouping: this.monetary.mon_grouping,
+            int,
+        }
+
+        return this.number_format(number, optionsOrDecimals, defaultOptions);
+    }
+
+    money(number, optionsOrDecimals, int) {
+        return this.percent_format(number, optionsOrDecimals, int);
+    }
 }
 
 export const loc = new Locale();
