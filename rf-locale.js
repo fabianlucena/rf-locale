@@ -366,6 +366,10 @@ export class Locale {
     }
 
     async strftime(format, time) {
+        if (!time) {
+            return time;
+        }
+        
         let index = 0;
         let position;
         let result = '';
