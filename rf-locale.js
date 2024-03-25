@@ -441,6 +441,10 @@ export class Locale {
   }
 
   number_format(number, optionsOrDecimals, options) {
+    if (number === undefined || number === null) {
+      return number;
+    }
+
     const defaultOptions = {
       thousands_sep: ',',
       decimal_point: '.',
@@ -583,7 +587,7 @@ export class Locale {
   }
 
   number(number, optionsOrDecimals) {
-    return this.number(number, optionsOrDecimals);
+    return this.number_format(number, optionsOrDecimals);
   }
 
   percent_format(number, optionsOrDecimals) {
@@ -601,6 +605,10 @@ export class Locale {
   }
 
   monetary_format(number, optionsOrDecimals, int) {
+    if (number === undefined || number === null) {
+      return number;
+    }
+
     const defaultOptions = {
       defaultSymbol: '$',
       intDefaultSymbol: '$',
