@@ -442,7 +442,7 @@ export class Locale {
         case 'x': result += await this.strftime(this.time.d_fmt, time); break; // Date representation * 08/23/01
         case 'X': result += await this.strftime(this.time.t_fmt, time); break; // Time representation * 14:55:02
         case 'y': result += ('0' + (time.getFullYear() % 100)).slice(-2); ; break; // Year, last two digits (00-99) 01
-        case 'Y': result += ('0' + time.getFullYear()).slice(-2); break; // Year 2001
+        case 'Y': result += ('000' + time.getFullYear()).slice(-4); break; // Year 2001
         case 'z': result += this.iso8601Offset(time); break; // ISO 8601 offset from UTC in timezone (1 minute=1, 1 hour=100) If timezone cannot be determined, no characters +100
         case 'Z': result += this.iso8601TimeZone(time); break; // Timezone name or abbreviation * If timezone cannot be determined, no characters CDT
         case '%': result += '%'; break; // A % sign %
