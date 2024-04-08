@@ -365,7 +365,12 @@ export class Locale {
     return time.toLocaleDateString(undefined, { day: 'numeric', timeZoneName: 'short' }).split(',')[1].trim() ?? '';
   }
 
-  textToDate(text) {
+  textToDate(text, options) {
+    if (!text) {
+      return text;
+    }
+
+    let result;
     const isoDateMatched = /(\d{4})-?(\d{2})-?(\d{2})/.exec(text);
     if (isoDateMatched) {
       const dateParams = [isoDateMatched[1], isoDateMatched[2] - 1, isoDateMatched[3]];
@@ -375,10 +380,16 @@ export class Locale {
         dateParams.push(isoTimeMatched[1], isoTimeMatched[2], isoTimeMatched[3]);
       }
 
-      return new Date(...dateParams);
+      result = new Date(...dateParams);
+    } else {
+      result = new Date(text);
     }
 
-    return new Date(text);
+    if (options?.offset) {
+      result.setDate(result.getDate() + options.offset);
+    }
+
+    return result;
   }
 
   async strftime(format, time) {
