@@ -1,4 +1,4 @@
-import {format, merge} from './lib/utils.js';
+import { format, merge } from './lib/utils.js';
 import en from './locale/en.js';
 
 export class Locale {
