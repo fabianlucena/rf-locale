@@ -294,7 +294,7 @@ export class Locale {
     return Math.floor((this.dayOfYear(time) + 7 - time.getDay()) / 7);
   }
 
-  weekOfModays(time) {
+  weekOfMondays(time) {
     return Math.floor((this.dayOfYear(time) + 7 - (time.getDay() - 1) % 7) / 7);
   }
 
@@ -311,11 +311,11 @@ export class Locale {
     const firstDay = firstDate.getDay();
     const isLeapYear = this.isLeapYear(year);
     if (!isLeapYear) {
-      if (firstDay === 4 /* thursday */) {
+      if (firstDay === 4 /* Thursday */) {
         return 53;
       }
     } else if (isLeapYear) {
-      if (firstDay === 3 /* wednesday */) {
+      if (firstDay === 3 /* Wednesday */) {
         return 53;
       }
     }
@@ -323,11 +323,11 @@ export class Locale {
     const lastDate = new Date(year, 11, 31);
     const lastDay = lastDate.getDay();
     if (!isLeapYear) {
-      if (lastDay.getDay() === 4 /* thursday */) {
+      if (lastDay.getDay() === 4 /* Thursday */) {
         return 53;
       }
     } else if (isLeapYear) {
-      if (lastDay.getDay() === 5 /* friday */) {
+      if (lastDay.getDay() === 5 /* Friday */) {
         return 53;
       }
     }
@@ -519,14 +519,14 @@ export class Locale {
       }
     }
 
-    let formated;
+    let formatted;
     if (options.frac_digits === undefined) {
-      formated = Math.abs(number).toString();
+      formatted = Math.abs(number).toString();
     } else {
-      formated = Math.abs(number).toFixed(options.frac_digits);
+      formatted = Math.abs(number).toFixed(options.frac_digits);
     }
 
-    const parts = formated.split('.');
+    const parts = formatted.split('.');
     if (options.grouping) {
       let integer = parts[0];
       let rgx = new RegExp(`(\\d+)(\\d{${options.grouping}})`);
@@ -537,7 +537,7 @@ export class Locale {
       parts[0] = integer;
     }
 
-    formated = parts.join(options.decimal_point);
+    formatted = parts.join(options.decimal_point);
 
     let sign;
     let sep;
@@ -565,52 +565,52 @@ export class Locale {
     switch (signPos) {
     case 0:
       if (precedes) {
-        formated = options.symbol + sep + formated;
+        formatted = options.symbol + sep + formatted;
       } else {
-        formated = formated + sep + options.symbol;
+        formatted = formatted + sep + options.symbol;
       }
 
-      formated = `(${formated})`;
+      formatted = `(${formatted})`;
       break;
 
     case 1:
       if (precedes) {
-        formated = options.symbol + sep + formated;
+        formatted = options.symbol + sep + formatted;
       } else {
-        formated = formated + sep + options.symbol;
+        formatted = formatted + sep + options.symbol;
       }
 
-      formated = sign + formated;
+      formatted = sign + formatted;
       break;
 
     case 2:
       if (precedes) {
-        formated = options.symbol + sep + formated;
+        formatted = options.symbol + sep + formatted;
       } else {
-        formated = formated + sep + options.symbol;
+        formatted = formatted + sep + options.symbol;
       }
 
-      formated = formated + sign;
+      formatted = formatted + sign;
       break;
 
     case 3:
       if (precedes) {
-        formated = sign + options.symbol + sep + formated;
+        formatted = sign + options.symbol + sep + formatted;
       } else {
-        formated = formated + sep + sign + options.symbol;
+        formatted = formatted + sep + sign + options.symbol;
       }
       break;
 
     case 4:
       if (precedes) {
-        formated = options.symbol + sign + sep + formated;
+        formatted = options.symbol + sign + sep + formatted;
       } else {
-        formated = formated + sep + options.symbol + sign;
+        formatted = formatted + sep + options.symbol + sign;
       }
       break;
     }
 
-    return formated;
+    return formatted;
   }
 
   number(number, optionsOrDecimals) {
