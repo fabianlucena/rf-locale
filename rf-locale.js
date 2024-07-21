@@ -110,7 +110,16 @@ export class Locale {
 
     text = (await this.getTextRaw(text, { domain, context }))[text] ?? text;
 
-    return format(text, ...opt);
+    const newOpt = [];
+    for (let op of opt) {
+      if (typeof op === 'function') {
+        op = await op(loc, context, domain);
+      }
+
+      newOpt.push(op);
+    }
+
+    return format(text, ...newOpt);
   }
 
   _dcf(domain, context, text, ...params) {
